@@ -71,7 +71,8 @@ function Home() {
           style={{ backgroundImage: `url(${bannerImages[bannerIndex]})` }}
           aria-label="Home promotional banner"
         >
-          <div className="banner-overlay">
+          <div className="banner-overlay" aria-hidden="true"></div>
+          <div className="banner-text">
             <h2>Electronics Shop</h2>
             <p>Best deals on the latest devices. Explore now.</p>
           </div>

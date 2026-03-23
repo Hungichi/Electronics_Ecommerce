@@ -75,10 +75,10 @@ function Footer() {
         <div className="footer-section">
           <h4>Address</h4>
           <div className="address-info">
-            <p><strong>Address:</strong><br />1234 Street Address<br />City Address, 1234</p>
-            <p><strong>Phones:</strong><br />(00) 1234 5678</p>
+            <p><strong>Address:</strong><br />14 Ngoc Khanh Ba Dinh<br />Hanoi</p>
+            <p><strong>Phones:</strong><br />(+84) 1234 5678</p>
             <p><strong>We are open:</strong><br />Monday-Thursday: 9:00 AM - 5:30 PM<br />Friday: 9:00 AM - 6:00 PM<br />Saturday: 11:00 AM - 5:00 PM</p>
-            <p><strong>E-mail:</strong><br />shop@email.com</p>
+            <p><strong>E-mail:</strong><br />HV@email.com</p>
           </div>
         </div>
       </div>
@@ -89,11 +89,11 @@ function Footer() {
       {/* Bottom Section */}
       <div className="footer-bottom">
         <div className="payment-methods">
-          <span>💳 Visa</span>
-          <span>🏦 PayPal</span>
-          <span>💳 Maestro</span>
-          <span>💳 Discover</span>
-          <span>💳 Amex</span>
+          <span> Visa</span>
+          <span> PayPal</span>
+          <span> Maestro</span>
+          <span> Discover</span>
+          <span> Amex</span>
         </div>
 
         <div className="social-media">

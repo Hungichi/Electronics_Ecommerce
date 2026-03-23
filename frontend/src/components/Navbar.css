@@ -61,7 +61,7 @@ nav {
     font-weight: 600;
     cursor: pointer;
     transition: color 0.3s ease;
-    white-space: nowrap;
+
 }
 
 .nav-link:hover {
