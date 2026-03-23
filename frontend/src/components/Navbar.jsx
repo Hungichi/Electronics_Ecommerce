@@ -15,6 +15,7 @@ function Navbar() {
 
         {/* Nav Links */}
         <div className="nav-links">
+          <a href="/" className="nav-link">Home</a>
           <a href="/products?category=laptops" className="nav-link">Laptops</a>
           <a href="/products?category=desktops" className="nav-link">Desktop PCs</a>
           <a href="/products?category=parts" className="nav-link">PC Parts</a>
@@ -29,9 +30,9 @@ function Navbar() {
             <IoCartOutline className='cart-icon' />
             <span className="cart-badge">0</span>
           </div>
-          <div className="profile-avatar">
+          <a href='/login' className="profile-avatar">
             <CgProfile className='profile-icon' />
-          </div>
+          </a>
         </div>
       </div>
       <div className="nav-divider"></div>
