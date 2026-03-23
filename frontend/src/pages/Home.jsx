@@ -1,6 +1,14 @@
 import { useState } from 'react'
 import './Home.css'
 
+import product1 from '../assets/products/product1.svg'
+import product2 from '../assets/products/product2.svg'
+import product3 from '../assets/products/product3.svg'
+import product4 from '../assets/products/product4.svg'
+import product5 from '../assets/products/product5.svg'
+import product6 from '../assets/products/product6.svg'
+
+
 const bannerImages = [
   'https://blog.withdipp.com/hubfs/BlogFeatureMSi.jpg',
   'https://storage-asset.msi.com/us/picture/event/2021/cnd/us-flat-is-back/msi-us-flate-banner.jpg',
@@ -12,7 +20,7 @@ const newProducts = [
     id: 1,
     title: 'MSI Pro 16 Flex-036AU',
     price: '$499.00',
-    image: 'https://images.unsplash.com/photo-1587825140708-2a0efe4f042d?auto=format&fit=crop&w=300&q=80',
+    image: product1,
     inStock: true,
     rating: 4,
   },
@@ -20,7 +28,7 @@ const newProducts = [
     id: 2,
     title: 'MSI All-In-One 27″',
     price: '$899.00',
-    image: 'https://images.unsplash.com/photo-1555617117-08d0156e25df?auto=format&fit=crop&w=300&q=80',
+    image: product2,
     inStock: true,
     rating: 5,
   },
@@ -28,7 +36,7 @@ const newProducts = [
     id: 3,
     title: 'Gaming Notebook X15',
     price: '$1299.00',
-    image: 'https://images.unsplash.com/photo-1565043466796-95e5f6c9588b?auto=format&fit=crop&w=300&q=80',
+    image: product3,
     inStock: true,
     rating: 4,
   },
@@ -36,7 +44,7 @@ const newProducts = [
     id: 4,
     title: 'Desktop Workstation Z5',
     price: '$1150.00',
-    image: 'https://images.unsplash.com/photo-1573271125619-a66420b41e77?auto=format&fit=crop&w=300&q=80',
+    image: product4,
     inStock: true,
     rating: 5,
   },
@@ -44,17 +52,26 @@ const newProducts = [
     id: 5,
     title: 'Premium Thursday PC',
     price: '$1030.00',
-    image: 'https://images.unsplash.com/photo-1626137428936-c8e05a13c5f6?auto=format&fit=crop&w=300&q=80',
+    image: product5,
     inStock: true,
     rating: 4,
   },
+  {
+    id: 6,
+    title: 'Ultra Slim Laptop',
+    price: '$899.00',
+    image: product6,
+    inStock: true,
+    rating: 5,
+  }
+
 ]
 
 function Home() {
   const [bannerIndex, setBannerIndex] = useState(0)
   const [slideIndex, setSlideIndex] = useState(0)
-
-  const prevBanner = () => setBannerIndex((prev) => (prev - 1 + bannerImages.length) % bannerImages.length)
+ 
+  const prevBanner = () => setBannerIndex((prev) =>(prev - 1 + bannerImages.length) % bannerImages.length)
   const nextBanner = () => setBannerIndex((prev) => (prev + 1) % bannerImages.length)
 
   const slidesToShow = 3
