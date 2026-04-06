@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import './Home.css'
 
 import product1 from '../assets/products/product1.svg'
@@ -64,21 +65,196 @@ const newProducts = [
     inStock: true,
     rating: 5,
   }
-
 ]
+
+const desktopProducts = [
+  {
+    id: 101,
+    title: 'MSI MEG Trident X',
+    price: '$2499.00',
+    image: product4,
+    inStock: true,
+    rating: 5,
+  },
+  {
+    id: 102,
+    title: 'MSI Infinite RS',
+    price: '$1899.00',
+    image: product1,
+    inStock: true,
+    rating: 4,
+  },
+  {
+    id: 103,
+    title: 'MSI MAG Codex 5',
+    price: '$1299.00',
+    image: product2,
+    inStock: true,
+    rating: 4,
+  },
+  {
+    id: 104,
+    title: 'MSI Pro DP21',
+    price: '$799.00',
+    image: product3,
+    inStock: true,
+    rating: 5,
+  },
+  {
+    id: 105,
+    title: 'MSI Nightblade MIB',
+    price: '$1150.00',
+    image: product5,
+    inStock: true,
+    rating: 4,
+  },
+  {
+    id: 106,
+    title: 'MSI Cubi N JSL',
+    price: '$499.00',
+    image: product6,
+    inStock: true,
+    rating: 5,
+  },
+]
+
+const laptopProducts = [
+  {
+    id: 201,
+    title: 'MSI GS66 Stealth',
+    price: '$1799.00',
+    image: product3,
+    inStock: true,
+    rating: 5,
+  },
+  {
+    id: 202,
+    title: 'MSI Creator Z16',
+    price: '$2199.00',
+    image: product6,
+    inStock: true,
+    rating: 4,
+  },
+  {
+    id: 203,
+    title: 'MSI Prestige 14',
+    price: '$1299.00',
+    image: product1,
+    inStock: true,
+    rating: 4,
+  },
+  {
+    id: 204,
+    title: 'MSI GL65 Leopard',
+    price: '$999.00',
+    image: product2,
+    inStock: true,
+    rating: 5,
+  },
+  {
+    id: 205,
+    title: 'MSI Summit E15',
+    price: '$1499.00',
+    image: product4,
+    inStock: true,
+    rating: 4,
+  },
+  {
+    id: 206,
+    title: 'MSI Modern 15',
+    price: '$749.00',
+    image: product5,
+    inStock: true,
+    rating: 5,
+  },
+]
+
+const pcPartsProducts = [
+  {
+    id: 301,
+    title: 'MSI GeForce RTX 4090',
+    price: '$1999.00',
+    image: product5,
+    inStock: true,
+    rating: 5,
+  },
+  {
+    id: 302,
+    title: 'MSI MAG B650 Tomahawk',
+    price: '$249.00',
+    image: product2,
+    inStock: true,
+    rating: 4,
+  },
+  {
+    id: 303,
+    title: 'MSI MAG CoreLiquid 360R',
+    price: '$139.00',
+    image: product4,
+    inStock: true,
+    rating: 4,
+  },
+  {
+    id: 304,
+    title: 'MSI MPG A1000G PSU',
+    price: '$179.00',
+    image: product1,
+    inStock: true,
+    rating: 5,
+  },
+  {
+    id: 305,
+    title: 'MSI Vigor GK71 Sonic',
+    price: '$129.00',
+    image: product3,
+    inStock: true,
+    rating: 4,
+  },
+  {
+    id: 306,
+    title: 'MSI Optix MAG274QRF',
+    price: '$399.00',
+    image: product6,
+    inStock: true,
+    rating: 5,
+  },
+]
+
+function ProductCarousel({ products, slidesToShow = 3 }) {
+  const [slideIndex, setSlideIndex] = useState(0)
+  const totalSlides = Math.max(1, products.length - slidesToShow + 1)
+  const prevSlide = () => setSlideIndex((n) => Math.max(0, n - 1))
+  const nextSlide = () => setSlideIndex((n) => Math.min(totalSlides - 1, n + 1))
+
+  return (
+    <div className="carousel-container">
+      <button className="carousel-control" onClick={prevSlide} disabled={slideIndex === 0}>&lt;</button>
+      <div className="carousel-window">
+        <div className="carousel-track" style={{ transform: `translateX(-${slideIndex * (100 / slidesToShow)}%)` }}>
+          {products.map((product) => (
+            <article key={product.id} className="product-card">
+              <div className="product-image" style={{ backgroundImage: `url(${product.image})` }} />
+              <div className="product-status">
+                <span className="in-stock">{product.inStock ? 'In Stock' : 'Out of Stock'}</span>
+              </div>
+              <p className="rating">Reviews ({product.rating})</p>
+              <h3>{product.title}</h3>
+              <p className="price">{product.price}</p>
+              <button className="product-btn">Check Availability</button>
+            </article>
+          ))}
+        </div>
+      </div>
+      <button className="carousel-control" onClick={nextSlide} disabled={slideIndex >= totalSlides - 1}>&gt;</button>
+    </div>
+  )
+}
 
 function Home() {
   const [bannerIndex, setBannerIndex] = useState(0)
-  const [slideIndex, setSlideIndex] = useState(0)
- 
+
   const prevBanner = () => setBannerIndex((prev) =>(prev - 1 + bannerImages.length) % bannerImages.length)
   const nextBanner = () => setBannerIndex((prev) => (prev + 1) % bannerImages.length)
-
-  const slidesToShow = 3
-  const totalSlides = Math.max(1, newProducts.length - slidesToShow + 1)
-
-  const prevSlide = () => setSlideIndex((n) => Math.max(0, n - 1))
-  const nextSlide = () => setSlideIndex((n) => Math.min(totalSlides - 1, n + 1))
 
   return (
     <div className="home-page">
@@ -100,30 +276,36 @@ function Home() {
         </div>
       </section>
 
-      <section className="new-products">
-        <h2>New Products</h2>
-        <div className="carousel-container">
-          <button className="carousel-control" onClick={prevSlide} disabled={slideIndex === 0}>&lt;</button>
-
-          <div className="carousel-window">
-            <div className="carousel-track" style={{ transform: `translateX(-${slideIndex * (100 / slidesToShow)}%)` }}>
-              {newProducts.map((product) => (
-                <article key={product.id} className="product-card">
-                  <div className="product-image" style={{ backgroundImage: `url(${product.image})` }} />
-                  <div className="product-status">
-                    <span className="in-stock">{product.inStock ? 'In Stock' : 'Out of Stock'}</span>
-                  </div>
-                  <p className="rating">Reviews ({product.rating})</p>
-                  <h3>{product.title}</h3>
-                  <p className="price">{product.price}</p>
-                  <button className="product-btn">Check Availability</button>
-                </article>
-              ))}
-            </div>
-          </div>
-
-          <button className="carousel-control" onClick={nextSlide} disabled={slideIndex >= totalSlides - 1}>&gt;</button>
+      <section className="product-section">
+        <div className="section-header">
+          <h2>New Products</h2>
+          <Link to="/products" className="see-all-link">See All New Products</Link>
         </div>
+        <ProductCarousel products={newProducts} />
+      </section>
+
+      <section className="product-section">
+        <div className="section-header">
+          <h2>Desktops</h2>
+          <Link to="/products?category=desktops" className="see-all-link">See All Desktops</Link>
+        </div>
+        <ProductCarousel products={desktopProducts} />
+      </section>
+
+      <section className="product-section">
+        <div className="section-header">
+          <h2>Laptops</h2>
+          <Link to="/products?category=laptops" className="see-all-link">See All Laptops</Link>
+        </div>
+        <ProductCarousel products={laptopProducts} />
+      </section>
+
+      <section className="product-section">
+        <div className="section-header">
+          <h2>PC Parts</h2>
+          <Link to="/products?category=parts" className="see-all-link">See All PC Parts</Link>
+        </div>
+        <ProductCarousel products={pcPartsProducts} />
       </section>
     </div>
   )
