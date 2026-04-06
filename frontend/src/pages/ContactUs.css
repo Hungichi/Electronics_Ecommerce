@@ -1,0 +1,269 @@
+.contact-page {
+    font-family: 'Poppins', sans-serif;
+    color: #111;
+    background: #fff;
+}
+
+/* Header / Breadcrumb */
+.contact-header {
+    max-width: 1398px;
+    margin: 0 auto;
+    padding: 40px 0 30px;
+}
+
+.contact-breadcrumb {
+    font-size: 12px;
+    color: #a3a3a3;
+    font-weight: 300;
+    margin-bottom: 8px;
+}
+
+.contact-title {
+    font-size: 32px;
+    font-weight: 600;
+    color: #000;
+}
+
+/* Body: form + info card */
+.contact-body {
+    max-width: 1398px;
+    margin: 0 auto;
+    display: flex;
+    gap: 60px;
+    padding-bottom: 60px;
+}
+
+.contact-form-area {
+    flex: 1;
+}
+
+.contact-intro {
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.875;
+    color: #000;
+    margin-bottom: 32px;
+}
+
+/* Form */
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-row {
+    display: flex;
+    gap: 30px;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group-full {
+    width: 100%;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #000;
+    margin-bottom: 8px;
+    line-height: 2.1;
+}
+
+.form-group input,
+.form-group textarea {
+    border: 1px solid #a2a6b0;
+    border-radius: 4px;
+    padding: 14px 17px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: #000;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #a2a6b0;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #0156ff;
+}
+
+.form-group input {
+    height: 50px;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 236px;
+}
+
+.contact-submit-btn {
+    width: 151px;
+    height: 50px;
+    border-radius: 50px;
+    border: none;
+    background-color: #0156ff;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.contact-submit-btn:hover {
+    background-color: #0049bb;
+}
+
+/* Info Card */
+.contact-info-card {
+    width: 411px;
+    flex-shrink: 0;
+    background-color: #f5f7ff;
+    border-radius: 0;
+    padding: 26px 31px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    align-self: flex-start;
+}
+
+.info-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+.info-icon {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+    color: #000;
+}
+
+.info-content h4 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #000;
+    margin-bottom: 4px;
+}
+
+.info-content p {
+    font-size: 13px;
+    font-weight: 400;
+    color: #000;
+    line-height: 1.6;
+}
+
+.info-email {
+    color: #0156ff !important;
+}
+
+/* Features */
+.contact-features {
+    background-color: #f5f7ff;
+    padding: 60px 0;
+}
+
+.contact-features-inner {
+    max-width: 1160px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+}
+
+.contact-feature-card {
+    flex: 1;
+    max-width: 265px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 13px;
+}
+
+.contact-feature-icon {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background-color: #0156ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 26px;
+    margin-bottom: 11px;
+}
+
+.contact-feature-card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #000;
+    line-height: 1.33;
+}
+
+.contact-feature-card p {
+    font-size: 14px;
+    font-weight: 400;
+    color: #000;
+    opacity: 0.7;
+    line-height: 1.4;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+    .contact-body {
+        flex-direction: column;
+        padding: 0 24px 40px;
+    }
+
+    .contact-header {
+        padding: 24px 24px 20px;
+    }
+
+    .contact-info-card {
+        width: 100%;
+    }
+
+    .contact-features-inner {
+        flex-direction: column;
+        align-items: center;
+        padding: 0 24px;
+    }
+
+    .contact-feature-card {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .contact-header {
+        padding: 24px 16px 16px;
+    }
+
+    .contact-body {
+        padding: 0 16px 32px;
+    }
+}

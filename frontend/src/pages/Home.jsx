@@ -222,6 +222,7 @@ const pcPartsProducts = [
 
 function ProductCarousel({ products, slidesToShow = 3 }) {
   const [slideIndex, setSlideIndex] = useState(0)
+  // count slides base on total product
   const totalSlides = Math.max(1, products.length - slidesToShow + 1)
   const prevSlide = () => setSlideIndex((n) => Math.max(0, n - 1))
   const nextSlide = () => setSlideIndex((n) => Math.min(totalSlides - 1, n + 1))
@@ -230,7 +231,7 @@ function ProductCarousel({ products, slidesToShow = 3 }) {
     <div className="carousel-container">
       <button className="carousel-control" onClick={prevSlide} disabled={slideIndex === 0}>&lt;</button>
       <div className="carousel-window">
-        <div className="carousel-track" style={{ transform: `translateX(-${slideIndex * (100 / slidesToShow)}%)` }}>
+        <div className="carousel-track" style={{ transform: `translateX(-${slideIndex * (60 / slidesToShow)}%)` }}>
           {products.map((product) => (
             <article key={product.id} className="product-card">
               <div className="product-image" style={{ backgroundImage: `url(${product.image})` }} />

@@ -27,7 +27,7 @@ function Footer() {
             <li><a href="#search">Search</a></li>
             <li><a href="#terms">Terms</a></li>
             <li><a href="#orders">Orders and Returns</a></li>
-            <li><a href="#contact">Contact Us</a></li>
+            <li><a href="/contact">Contact Us</a></li>
             <li><a href="#advanced">Advanced Search</a></li>
           </ul>
         </div>
