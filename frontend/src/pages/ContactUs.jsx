@@ -63,7 +63,7 @@ function ContactUs() {
                   type="tel"
                   name="phone"
                   placeholder="Your Phone"
-                  value={form.number}
+                  value={form.phone}
                   onChange={handleChange}
                 />
               </div>
