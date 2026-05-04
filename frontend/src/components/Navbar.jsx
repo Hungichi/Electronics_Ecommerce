@@ -24,15 +24,22 @@ function Navbar() {
 
         {/* Right Section */}
         <div className='user-section'>
-          <button className="deals-btn">Our Deals</button>
           <CiSearch className='search-icon' />
           <div className="cart-wrapper">
             <IoCartOutline className='cart-icon' />
             <span className="cart-badge">0</span>
           </div>
-          <a href='/login' className="profile-avatar">
-            <CgProfile className='profile-icon' />
-          </a>
+          <div className="profile-wrapper">
+            <div className="profile-avatar">
+              <CgProfile className='profile-icon' />
+            </div>
+            <div className="profile-dropdown">
+              <a href="/account" className="dropdown-item">My Account</a>
+              <a href="/wishlist" className="dropdown-item">My Wish List (0)</a>
+              <a href="/register" className="dropdown-item">Create an Account</a>
+              <a href="/login" className="dropdown-item">Sign In</a>
+            </div>
+          </div>
         </div>
       </div>
       <div className="nav-divider"></div>
