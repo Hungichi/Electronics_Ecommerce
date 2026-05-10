@@ -1,24 +1,30 @@
-const express = require("express")
-const cors = require("cors")
-const dotenv = require("dotenv")
-const mongoose = require("mongoose")
-const cookieParser = require("cookie-parser")
-const authRoute = require("./routes/authRoutes")
-const database = require("./config/db")
+const express      = require("express");
+const cors         = require("cors");
+const dotenv       = require("dotenv");
+const cookieParser = require("cookie-parser");
 
-dotenv.config()
-const app = express()
+const database    = require("./config/db");
+const adminRoutes  = require("./routes/admin/index");
+const clientRoutes = require("./routes/client/index");
 
-database.connect()
+dotenv.config();
 
-app.use(cors())
-app.use(cookieParser())
-app.use(express.json())
+const app  = express();
+const PORT = process.env.PORT || 8000;
 
+// ─── Kết nối Database ─────────────────────────────────────────────────────────
+database.connect();
 
-//ROUTES    
-app.use("/v1/auth", authRoute)
+// ─── Middleware ───────────────────────────────────────────────────────────────
+app.use(cors());
+app.use(cookieParser());
+app.use(express.json());
 
-app.listen(8000, () => {
-    console.log("server is running.")
-})
+// ─── Routes ───────────────────────────────────────────────────────────────────
+adminRoutes(app);   // /admin/products, /admin/...
+clientRoutes(app);  // /products, /auth, ...
+
+// ─── Start Server ─────────────────────────────────────────────────────────────
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
