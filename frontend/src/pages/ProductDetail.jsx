@@ -1,4 +1,6 @@
-  import { useState } from "react";
+  import { useEffect, useState } from "react";
+  import { useParams } from "react-router-dom";
+  import { productApi } from "../services/api";
   import "./ProductDetail.css";
 
   // ============================================================
@@ -191,8 +193,49 @@
     // Carousel slide index cho section "Outplay the Competition"
     const [marketingSlide, setMarketingSlide] = useState(0);
 
-    // Dữ liệu sản phẩm (hiện dùng mock, sau thay bằng state + fetch)
-    const product = MOCK_PRODUCT;
+    // Read the ":id" segment from the URL (e.g. /products/abc123 -> id = "abc123").
+    const { id } = useParams();
+    // The real product data once the API responds; null while loading.
+    const [fetchedProduct, setFetchedProduct] = useState(null);
+    const [loadError, setLoadError] = useState("");
+
+    // Re-run whenever the URL id changes (e.g. when a user clicks a related product).
+    useEffect(() => {
+      if (!id) return;
+      // Abort flag: ignore the response if a newer fetch already started.
+      let aborted = false;
+      productApi.getById(id)
+        .then((data) => {
+          if (!aborted) setFetchedProduct(data);
+        })
+        .catch((err) => {
+          if (!aborted) setLoadError(err.message || "Không tải được sản phẩm");
+        });
+      return () => { aborted = true; };
+    }, [id]);
+
+    // Merge real backend fields into the mock structure so the page can still render
+    // its rich Features/Benefits sections (those are hard-coded in MOCK_PRODUCT).
+    const product = fetchedProduct ? {
+      ...MOCK_PRODUCT,
+      id: fetchedProduct._id,
+      name: fetchedProduct.name,
+      price: fetchedProduct.price,
+      sku: fetchedProduct._id,
+      category: fetchedProduct.category,
+      // Use the API's images when available, otherwise fall back to mock images.
+      images: (fetchedProduct.images && fetchedProduct.images.length > 0)
+        ? fetchedProduct.images
+        : MOCK_PRODUCT.images,
+      // Split the multi-line description into bullet points for the spec list.
+      specs: fetchedProduct.description
+        ? fetchedProduct.description.split('\n').filter(Boolean)
+        : MOCK_PRODUCT.specs,
+      about: {
+        ...MOCK_PRODUCT.about,
+        description: fetchedProduct.description || MOCK_PRODUCT.about.description,
+      },
+    } : MOCK_PRODUCT;
 
     // ─── HANDLERS ────────────────────────────────────────────
 
@@ -222,6 +265,23 @@
     };
 
     // ─── RENDER ──────────────────────────────────────────────
+    // Early return for the error state: render a short message instead of the full page.
+    if (loadError) {
+      return (
+        <div className="pd-page" style={{ padding: 60, textAlign: "center", color: "#d22" }}>
+          {loadError}
+        </div>
+      );
+    }
+    // Early return for the loading state while the API call is in flight.
+    if (id && !fetchedProduct) {
+      return (
+        <div className="pd-page" style={{ padding: 60, textAlign: "center" }}>
+          Loading...
+        </div>
+      );
+    }
+
     return (
       <div className="pd-page">
 

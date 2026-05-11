@@ -1,17 +1,47 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import "./Login.css";
 
 const CustomerLogin = () => {
-  const [email, setEmail] = useState("");
+  // Controlled inputs: their values live in React state.
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  // Inline error text shown right under the form when login fails.
+  const [error, setError] = useState("");
+  // Disables the submit button + shows "Signing In..." while the request is in flight.
+  const [loading, setLoading] = useState(false);
+  // login() comes from AuthContext: it hits the API and stores the user globally.
+  const { login } = useAuth();
+  // toast.success / toast.error trigger the global notification banner.
+  const toast = useToast();
+  // navigate() lets us redirect without reloading (SPA navigation).
+  const navigate = useNavigate();
 
-
-  
- const handleSignIn = async (e) => {
-  e.preventDefault();
-  console.log("Login")
-};
+  // Form submit handler. async so we can await the API call.
+  const handleSignIn = async (e) => {
+    // Stop the form from doing a full-page reload on submit.
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      // Calls POST /auth/login through AuthContext -> authApi.login -> request() -> fetch().
+      const user = await login({ username, password });
+      // Show a green toast as a success confirmation.
+      toast.success(`Đăng nhập thành công. Xin chào ${user?.username || ''}!`);
+      // Admins land on the dashboard, regular users go to the homepage.
+      navigate(user?.admin ? "/admin" : "/");
+    } catch (err) {
+      // Backend returned a non-2xx response -> show both inline error and a red toast.
+      const msg = err.message || "Đăng nhập thất bại";
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      // Always re-enable the button, whether the request succeeded or failed.
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="login-page">
@@ -39,14 +69,14 @@ const CustomerLogin = () => {
           <form onSubmit={handleSignIn}>
             <div className="form-group">
               <label className="form-label">
-                Email <span className="required">*</span>
+                Username <span className="required">*</span>
               </label>
               <input
                 className="form-input"
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </div>
@@ -65,9 +95,11 @@ const CustomerLogin = () => {
               />
             </div>
 
+            {error && <p className="error-msg" style={{ color: '#d22', marginTop: 8 }}>{error}</p>}
+
             <div className="signin-row">
-              <button className="btn-primary" type="submit">
-                Sign In
+              <button className="btn-primary" type="submit" disabled={loading}>
+                {loading ? "Signing In..." : "Sign In"}
               </button>
               <a href="/forgot-password" className="forgot-link">
                 Forgot Your Password?

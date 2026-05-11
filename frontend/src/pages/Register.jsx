@@ -1,21 +1,34 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import "./Register.css";
 
 const Register = () => {
+  // Controlled inputs for every form field.
   const [username, setUsername]         = useState("");
   const [email, setEmail]               = useState("");
   const [password, setPassword]         = useState("");
   const [confirmPassword, setConfirm]   = useState("");
+  // Per-field error messages produced by client-side validate().
   const [errors, setErrors]             = useState({});
+  // Toggles between "password" and "text" input types so the user can peek at their password.
   const [showPw, setShowPw]             = useState(false);
   const [showCf, setShowCf]             = useState(false);
+  // Error coming back from the server (e.g. "username already exists").
+  const [submitError, setSubmitError]   = useState("");
+  const [loading, setLoading]           = useState(false);
+  const { register } = useAuth();
+  const toast = useToast();
+  const navigate = useNavigate();
 
-  /* ── Validate ── */
+  /* ── Client-side validation ── */
+  // Runs before we even hit the API to give instant feedback.
   const validate = () => {
     const e = {};
     if (username.trim().length < 3)
       e.username = "Tên tài khoản phải có ít nhất 3 ký tự.";
+    // Simple email regex: anything @ anything . anything (no spaces).
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       e.email = "Vui lòng nhập địa chỉ e-mail hợp lệ.";
     if (password.length < 6)
@@ -25,13 +38,29 @@ const Register = () => {
     return e;
   };
 
-  /* ── Submit ── */
-  const handleRegister = (e) => {
+  /* ── Submit handler ── */
+  const handleRegister = async (e) => {
     e.preventDefault();
+    setSubmitError("");
+    // Run validation; if any error exists, stop here and let the UI show them.
     const errs = validate();
     setErrors(errs);
-    if (Object.keys(errs).length === 0) {
-      console.log("Register", { username, email, password });
+    if (Object.keys(errs).length > 0) return;
+
+    setLoading(true);
+    try {
+      // Calls POST /auth/register; AuthContext auto-logs the new user in.
+      const user = await register({ username, email, password });
+      toast.success(`Tạo tài khoản thành công. Chào mừng ${user?.username || ''}!`);
+      // After signing up, send the user to the homepage as a logged-in customer.
+      navigate("/");
+    } catch (err) {
+      // Backend rejected the request (duplicate username, server error, ...).
+      const msg = err.message || "Đăng ký thất bại";
+      setSubmitError(msg);
+      toast.error(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -172,9 +201,13 @@ const Register = () => {
               )}
             </div>
 
+            {submitError && (
+              <p className="error-msg" style={{ color: '#d22', marginTop: 8 }}>{submitError}</p>
+            )}
+
             <div className="signin-row">
-              <button className="btn-primary" type="submit">
-                Create An Account
+              <button className="btn-primary" type="submit" disabled={loading}>
+                {loading ? "Creating Account..." : "Create An Account"}
               </button>
             </div>
           </form>
