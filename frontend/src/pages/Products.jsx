@@ -16,7 +16,7 @@ const SORT_OPTIONS = [
 
 function Products() {
   // useSearchParams gives us the URL query string as a manageable object.
-  // We store filter state in the URL so it survives reloads and can be shared.
+  // store filter state in the URL so it survives reloads and can be shared.
   const [searchParams, setSearchParams] = useSearchParams()
   const [products, setProducts] = useState([])
   const [pagination, setPagination] = useState(null)

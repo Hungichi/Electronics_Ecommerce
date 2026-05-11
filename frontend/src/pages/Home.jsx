@@ -308,10 +308,10 @@ function Home() {
 
   // Each call fires one GET /products request with a different category filter.
   // The hook returns mock data immediately, then swaps it for real data once the API answers.
-  const newItems     = useApiProducts({ limit: 6, fallback: newProducts })
-  const desktopItems = useApiProducts({ category: 'desktops', limit: 6, fallback: desktopProducts })
-  const laptopItems  = useApiProducts({ category: 'laptops', limit: 6, fallback: laptopProducts })
-  const partsItems   = useApiProducts({ category: 'parts', limit: 6, fallback: pcPartsProducts })
+  const newItems     = useApiProducts({ limit: 8, fallback: newProducts })
+  const desktopItems = useApiProducts({ category: 'desktops', limit: 8, fallback: desktopProducts })
+  const laptopItems  = useApiProducts({ category: 'laptops', limit: 8, fallback: laptopProducts })
+  const partsItems   = useApiProducts({ category: 'parts', limit: 8 , fallback: pcPartsProducts })
 
   return (
     <div className="home-page">
