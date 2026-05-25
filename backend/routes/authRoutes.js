@@ -1,9 +1,14 @@
-const authController = require("../controllers/authController")
-const router = require("express").Router()
+const router         = require("express").Router();
+const authController = require("../controllers/authController");
+const { verifyToken } = require("../middleware/authMiddleware");
 
-//REGISTER
-router.post("/register", authController.registerUser)
+// Public routes
+router.post("/register", authController.registerUser);
+router.post("/login",    authController.loginUser);
+router.post("/refresh",  authController.refreshToken);
+router.post("/logout",   authController.logoutUser);
 
-//LOGIN
-router.post("/login", authController.loginUser)
+// Protected route (cần đăng nhập)
+router.get("/me", verifyToken, authController.getMe);
+
 module.exports = router;

@@ -1,8 +1,4 @@
-/**
- * Xây dựng object phân trang từ query params
- * @param {Object} query - req.query từ Express
- * @returns {{ page, limit, skip }}
- */
+
 const buildPagination = (query) => {
   const page  = Math.max(1, parseInt(query.page)  || 1);
   const limit = Math.min(100, Math.max(1, parseInt(query.limit) || 10));
@@ -21,22 +17,19 @@ const buildPaginationMeta = (total, page, limit) => ({
   total,
   page,
   limit,
-  totalPages: Math.ceil(total / limit),
-  hasNextPage: page * limit < total,
+  totalPages: Math.ceil(total / limit), //tong so trang, = tong product chia cho so luong moi trang, lam` tron len
+  hasNextPage: page * limit < total, 
   hasPrevPage: page > 1,
+
+  //hasNextPage, hasPrevPage: an hoac hien "trang tiep theo" or "trang truoc"
 });
 
-/**
- * Xây dựng Mongoose filter từ query params của product
- * Hỗ trợ: category, brand, minPrice, maxPrice, isFeatured, isActive, search
- * @param {Object} query - req.query
- * @returns {Object} Mongoose filter object
- */
+
 const buildProductFilter = (query) => {
   const filter = {};
 
   if (query.category)   filter.category   = query.category;
-  if (query.brand)      filter.brand       = new RegExp(query.brand, "i");
+  if (query.brand)      filter.brand       = new RegExp(query.brand, "i"); //0 phan biet chu hoa//chu thuong
   if (query.isFeatured) filter.isFeatured  = query.isFeatured === "true";
   if (query.isActive)   filter.isActive    = query.isActive   === "true";
 
@@ -57,13 +50,7 @@ const buildProductFilter = (query) => {
   return filter;
 };
 
-/**
- * Xây dựng sort option từ query params
- * Hỗ trợ: sortBy (field), order (asc | desc)
- * Mặc định: sort theo createdAt mới nhất
- * @param {Object} query - req.query
- * @returns {Object} Mongoose sort object
- */
+
 const buildSortOption = (query) => {
   const ALLOWED_SORT_FIELDS = ["price", "rating", "sold", "createdAt", "name"];
   const sortBy = ALLOWED_SORT_FIELDS.includes(query.sortBy) ? query.sortBy : "createdAt";
