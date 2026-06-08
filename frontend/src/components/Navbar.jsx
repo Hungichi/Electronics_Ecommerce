@@ -1,10 +1,15 @@
+import { Link } from 'react-router-dom'
 import './Navbar.css'
 import { CiSearch } from "react-icons/ci";
 import { IoCartOutline } from "react-icons/io5";
 import { CgProfile } from "react-icons/cg";
+import { useCart } from '../context/CartContext'
 
 
 function Navbar() {
+  // totalItems comes from CartContext and re-renders the badge whenever the cart changes.
+  const { totalItems } = useCart()
+
   return (
     <nav>
       <div className="nav-container">
@@ -26,10 +31,11 @@ function Navbar() {
         <div className='user-section'>
           <button className="deals-btn">Our Deals</button>
           <CiSearch className='search-icon' />
-          <div className="cart-wrapper">
+          {/* Link goes to /cart; badge shows the live total quantity. */}
+          <Link to="/cart" className="cart-wrapper">
             <IoCartOutline className='cart-icon' />
-            <span className="cart-badge">0</span>
-          </div>
+            <span className="cart-badge">{totalItems}</span>
+          </Link>
           <a href='/login' className="profile-avatar">
             <CgProfile className='profile-icon' />
           </a>

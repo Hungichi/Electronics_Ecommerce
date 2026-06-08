@@ -68,6 +68,28 @@ export const productApi = {
   getById: (id) => request(`/products/${id}`),
 }
 
+// ── Cart endpoints (scoped per user) ─────────────────────
+// Every endpoint takes the user's _id as the first path segment.
+export const cartApi = {
+  // GET /cart/:userId -> returns the cart with populated product details
+  get: (userId) => request(`/cart/${userId}`),
+
+  // POST /cart/:userId/items -> adds a product (or increments quantity if it's already there)
+  addItem: (userId, product_id, quantity = 1) =>
+    request(`/cart/${userId}/items`, { method: 'POST', body: { product_id, quantity } }),
+
+  // PUT /cart/:userId/items/:productId -> sets the quantity of an item
+  updateItem: (userId, productId, quantity) =>
+    request(`/cart/${userId}/items/${productId}`, { method: 'PUT', body: { quantity } }),
+
+  // DELETE /cart/:userId/items/:productId -> removes one item
+  removeItem: (userId, productId) =>
+    request(`/cart/${userId}/items/${productId}`, { method: 'DELETE' }),
+
+  // DELETE /cart/:userId -> empties the cart
+  clear: (userId) => request(`/cart/${userId}`, { method: 'DELETE' }),
+}
+
 // ── Admin product endpoints (CRUD + toggles) ─────────────
 // Used by the AdminDashboard page only.
 export const adminProductApi = {

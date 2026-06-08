@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { productApi } from "../services/api";
+import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import "./ProductDetail.css";
 
 // ─── STATIC PAGE CONTENT ─────────────────────────────────
@@ -83,6 +86,12 @@ export default function ProductDetails() {
   // Product data once the API responds; null while loading.
   const [product, setProduct] = useState(null);
   const [loadError, setLoadError] = useState("");
+  // Cart + auth + toast helpers for the Add to Cart button.
+  const { user } = useAuth();
+  const { addToCart } = useCart();
+  const toast = useToast();
+  const navigate = useNavigate();
+  const [adding, setAdding] = useState(false);
 
   // Re-fetch whenever the URL id changes.
   useEffect(() => {
@@ -102,9 +111,22 @@ export default function ProductDetails() {
     setQuantity((prev) => Math.max(1, prev + delta));
   };
 
-  // TODO: replace with POST /cart once the cart endpoint is implemented.
-  const handleAddToCart = () => {
-    alert(`Đã thêm ${quantity} ${product.name} vào giỏ hàng`);
+  // Add the current product to the user's cart via the backend.
+  const handleAddToCart = async () => {
+    if (!user) {
+      toast.info("Vui lòng đăng nhập để thêm vào giỏ hàng");
+      navigate("/login");
+      return;
+    }
+    setAdding(true);
+    try {
+      await addToCart(product._id, quantity);
+      toast.success(`Đã thêm ${quantity} × ${product.name} vào giỏ hàng`);
+    } catch (err) {
+      toast.error(err.message || "Thêm vào giỏ thất bại");
+    } finally {
+      setAdding(false);
+    }
   };
 
   // TODO: integrate PayPal SDK.
@@ -172,8 +194,8 @@ export default function ProductDetails() {
             <button className="pd-qty-btn" onClick={() => handleQuantityChange(1)}>+</button>
           </div>
 
-          <button className="pd-add-to-cart-btn" onClick={handleAddToCart}>
-            Add to Cart
+          <button className="pd-add-to-cart-btn" onClick={handleAddToCart} disabled={adding}>
+            {adding ? "Adding..." : "Add to Cart"}
           </button>
 
           <button className="pd-paypal-btn" onClick={handlePaypal}>

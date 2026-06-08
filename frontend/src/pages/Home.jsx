@@ -255,13 +255,13 @@ function ProductCarousel({ products, slidesToShow = 3 }) {
           ))}
         </div>
       </div>
-      <button className="carousel-control" onClick={nextSlide} disabled={slideIndex >= totalSlides - 1}>&gt;</button>
+      <button className="carousel-control" onClick={nextSlide} disabled={slideIndex >= totalSlides - 2}>&gt;</button>
     </div>
   )
 }
 
 // Converts a raw backend product into the shape the carousel expects.
-// If the product has no image we borrow one from the fallback mock to keep the UI looking good.
+// If the product has no image borrow one from the fallback mock to keep the UI look good.
 function mapApiProduct(p, fallbackImage) {
   return {
     id: p._id,
