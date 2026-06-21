@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { productApi } from '../services/api'
 import './Home.css'
 
 import product1 from '../assets/products/product1.svg'
@@ -220,8 +221,12 @@ const pcPartsProducts = [
   },
 ]
 
+// Carousel dùng chung cho cả 4 section (New, Desktops, Laptops, PC Parts)
+// Hiện `slidesToShow` card cùng lúc, trượt ngang bằng CSS transform
 function ProductCarousel({ products, slidesToShow = 3 }) {
+  // Vị trí slide hiện tại (0 = trái nhất)
   const [slideIndex, setSlideIndex] = useState(0)
+  // Số slide tối đa có thể bắt đầu (để không trượt quá xa)
   const totalSlides = Math.max(1, products.length - slidesToShow + 1)
   const prevSlide = () => setSlideIndex((n) => Math.max(0, n - 1))
   const nextSlide = () => setSlideIndex((n) => Math.min(totalSlides - 1, n + 1))
@@ -230,31 +235,83 @@ function ProductCarousel({ products, slidesToShow = 3 }) {
     <div className="carousel-container">
       <button className="carousel-control" onClick={prevSlide} disabled={slideIndex === 0}>&lt;</button>
       <div className="carousel-window">
+        {/* translateX dịch track sang trái N card-width.
+            CSS có transition: transform 0.4s trên .carousel-track → hiệu ứng trượt mượt */}
         <div className="carousel-track" style={{ transform: `translateX(-${slideIndex * (100 / slidesToShow)}%)` }}>
           {products.map((product) => (
-            <article key={product.id} className="product-card">
-              <div className="product-image" style={{ backgroundImage: `url(${product.image})` }} />
-              <div className="product-status">
-                <span className="in-stock">{product.inStock ? 'In Stock' : 'Out of Stock'}</span>
-              </div>
-              <p className="rating">Reviews ({product.rating})</p>
-              <h3>{product.title}</h3>
-              <p className="price">{product.price}</p>
-              <button className="product-btn">Check Availability</button>
-            </article>
+            // Bọc card bằng Link để click mở trang chi tiết
+            <Link key={product.id} to={product.linkId ? `/products/${product.linkId}` : '/products'} className="product-card-link">
+              <article className="product-card">
+                <div className="product-image" style={{ backgroundImage: `url(${product.image})` }} />
+                <div className="product-status">
+                  <span className="in-stock">{product.inStock ? 'In Stock' : 'Out of Stock'}</span>
+                </div>
+                <p className="rating">Reviews ({product.rating})</p>
+                <h3>{product.title}</h3>
+                <p className="price">{product.price}</p>
+                <button className="product-btn">Check Availability</button>
+              </article>
+            </Link>
           ))}
         </div>
       </div>
-      <button className="carousel-control" onClick={nextSlide} disabled={slideIndex >= totalSlides - 1}>&gt;</button>
+      <button className="carousel-control" onClick={nextSlide} disabled={slideIndex >= totalSlides - 2}>&gt;</button>
     </div>
   )
 }
 
+// Đổi sản phẩm từ format backend sang format carousel cần
+// Nếu không có ảnh thì dùng ảnh fallback (ảnh mock) để UI không bị trống
+function mapApiProduct(p, fallbackImage) {
+  return {
+    id: p._id,
+    linkId: p._id,
+    title: p.name,
+    price: `$${Number(p.price).toFixed(2)}`,
+    image: p.images?.[0] || fallbackImage,
+    inStock: (p.stock ?? 0) > 0,
+    rating: p.rating || 0,
+  }
+}
+
+// Custom hook: fetch sản phẩm 1 category, trả về list đã map
+// Nếu API trả rỗng hoặc lỗi thì giữ nguyên fallback (mock data)
+// → carousel không bao giờ bị trống, UI vẫn đẹp dù backend chưa có data
+function useApiProducts({ category, limit = 6, fallback }) {
+  const [items, setItems] = useState(fallback)
+  useEffect(() => {
+    let aborted = false
+    const params = { limit, sortBy: 'createdAt', order: 'desc', isActive: true }
+    if (category) params.category = category
+    productApi.list(params)
+      .then((data) => {
+        if (aborted) return
+        const list = data.products || []
+        // Chỉ thay fallback khi API có data thật
+        if (list.length > 0) {
+          setItems(list.map((p, i) => mapApiProduct(p, fallback[i % fallback.length].image)))
+        }
+      })
+      .catch(() => { /* lỗi thì giữ fallback */ })
+    return () => { aborted = true }
+  }, [category, limit])
+  return items
+}
+
 function Home() {
+  // Index banner đang hiển thị trên cùng
   const [bannerIndex, setBannerIndex] = useState(0)
 
+  // Modulo để banner cuối → next sẽ quay về banner đầu (và ngược lại)
   const prevBanner = () => setBannerIndex((prev) =>(prev - 1 + bannerImages.length) % bannerImages.length)
   const nextBanner = () => setBannerIndex((prev) => (prev + 1) % bannerImages.length)
+
+  // Mỗi dòng gọi 1 GET /products với category khác nhau
+  // Hook trả về mock data ngay, đến khi API trả về thì tự thay bằng data thật
+  const newItems     = useApiProducts({ limit: 8, fallback: newProducts })
+  const desktopItems = useApiProducts({ category: 'desktops', limit: 8, fallback: desktopProducts })
+  const laptopItems  = useApiProducts({ category: 'laptops', limit: 8, fallback: laptopProducts })
+  const partsItems   = useApiProducts({ category: 'parts', limit: 8 , fallback: pcPartsProducts })
 
   return (
     <div className="home-page">
@@ -281,7 +338,7 @@ function Home() {
           <h2>New Products</h2>
           <Link to="/products" className="see-all-link">See All New Products</Link>
         </div>
-        <ProductCarousel products={newProducts} />
+        <ProductCarousel products={newItems} />
       </section>
 
       <section className="product-section">
@@ -289,7 +346,7 @@ function Home() {
           <h2>Desktops</h2>
           <Link to="/products?category=desktops" className="see-all-link">See All Desktops</Link>
         </div>
-        <ProductCarousel products={desktopProducts} />
+        <ProductCarousel products={desktopItems} />
       </section>
 
       <section className="product-section">
@@ -297,7 +354,7 @@ function Home() {
           <h2>Laptops</h2>
           <Link to="/products?category=laptops" className="see-all-link">See All Laptops</Link>
         </div>
-        <ProductCarousel products={laptopProducts} />
+        <ProductCarousel products={laptopItems} />
       </section>
 
       <section className="product-section">
@@ -305,7 +362,7 @@ function Home() {
           <h2>PC Parts</h2>
           <Link to="/products?category=parts" className="see-all-link">See All PC Parts</Link>
         </div>
-        <ProductCarousel products={pcPartsProducts} />
+        <ProductCarousel products={partsItems} />
       </section>
     </div>
   )

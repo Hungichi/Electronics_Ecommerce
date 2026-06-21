@@ -1,17 +1,40 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import "./Login.css";
 
 const CustomerLogin = () => {
-  const [email, setEmail] = useState("");
+  // 2 input controlled — value lưu trong state, mỗi keystroke setState
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  // Báo lỗi inline dưới form
+  const [error, setError] = useState("");
+  // Khóa nút Submit khi đang gọi API
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();   // lấy hàm login từ AuthContext
+  const toast = useToast();
+  const navigate = useNavigate();
 
-
-  
- const handleSignIn = async (e) => {
-  e.preventDefault();
-  console.log("Login")
-};
+  const handleSignIn = async (e) => {
+    e.preventDefault();   // chặn form reload trang
+    setError("");
+    setLoading(true);
+    try {
+      // login() → AuthContext → authApi.login → fetch POST /auth/login
+      const user = await login({ username, password });
+      toast.success(`Đăng nhập thành công. Xin chào ${user?.username || ''}!`);
+      // admin → /admin, user thường → /
+      navigate(user?.admin ? "/admin" : "/");
+    } catch (err) {
+      // Backend trả lỗi (sai password, sai user) → hiện cả inline + toast đỏ
+      const msg = err.message || "Đăng nhập thất bại";
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="login-page">
@@ -39,14 +62,14 @@ const CustomerLogin = () => {
           <form onSubmit={handleSignIn}>
             <div className="form-group">
               <label className="form-label">
-                Email <span className="required">*</span>
+                Username <span className="required">*</span>
               </label>
               <input
                 className="form-input"
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </div>
@@ -65,9 +88,11 @@ const CustomerLogin = () => {
               />
             </div>
 
+            {error && <p className="error-msg" style={{ color: '#d22', marginTop: 8 }}>{error}</p>}
+
             <div className="signin-row">
-              <button className="btn-primary" type="submit">
-                Sign In
+              <button className="btn-primary" type="submit" disabled={loading}>
+                {loading ? "Signing In..." : "Sign In"}
               </button>
               <a href="/forgot-password" className="forgot-link">
                 Forgot Your Password?
