@@ -221,12 +221,12 @@ const pcPartsProducts = [
   },
 ]
 
-// Reusable carousel used by every section (New Products, Desktops, Laptops, PC Parts).
-// Renders `slidesToShow` cards at a time and slides horizontally via CSS transform.
+// Carousel dùng chung cho cả 4 section (New, Desktops, Laptops, PC Parts)
+// Hiện `slidesToShow` card cùng lúc, trượt ngang bằng CSS transform
 function ProductCarousel({ products, slidesToShow = 3 }) {
-  // Current scroll position in "slide units" (0 = leftmost).
+  // Vị trí slide hiện tại (0 = trái nhất)
   const [slideIndex, setSlideIndex] = useState(0)
-  // How many starting positions exist before the rightmost card is visible.
+  // Số slide tối đa có thể bắt đầu (để không trượt quá xa)
   const totalSlides = Math.max(1, products.length - slidesToShow + 1)
   const prevSlide = () => setSlideIndex((n) => Math.max(0, n - 1))
   const nextSlide = () => setSlideIndex((n) => Math.min(totalSlides - 1, n + 1))
@@ -235,11 +235,11 @@ function ProductCarousel({ products, slidesToShow = 3 }) {
     <div className="carousel-container">
       <button className="carousel-control" onClick={prevSlide} disabled={slideIndex === 0}>&lt;</button>
       <div className="carousel-window">
-        {/* translateX shifts the track left by N card-widths.
-            The CSS `transition: transform 0.4s` on .carousel-track gives the slide animation. */}
+        {/* translateX dịch track sang trái N card-width.
+            CSS có transition: transform 0.4s trên .carousel-track → hiệu ứng trượt mượt */}
         <div className="carousel-track" style={{ transform: `translateX(-${slideIndex * (100 / slidesToShow)}%)` }}>
           {products.map((product) => (
-            // Each card is a Link so clicking it opens the product detail page.
+            // Bọc card bằng Link để click mở trang chi tiết
             <Link key={product.id} to={product.linkId ? `/products/${product.linkId}` : '/products'} className="product-card-link">
               <article className="product-card">
                 <div className="product-image" style={{ backgroundImage: `url(${product.image})` }} />
@@ -260,8 +260,8 @@ function ProductCarousel({ products, slidesToShow = 3 }) {
   )
 }
 
-// Converts a raw backend product into the shape the carousel expects.
-// If the product has no image borrow one from the fallback mock to keep the UI look good.
+// Đổi sản phẩm từ format backend sang format carousel cần
+// Nếu không có ảnh thì dùng ảnh fallback (ảnh mock) để UI không bị trống
 function mapApiProduct(p, fallbackImage) {
   return {
     id: p._id,
@@ -274,9 +274,9 @@ function mapApiProduct(p, fallbackImage) {
   }
 }
 
-// Custom hook: fetches products for one category and returns the mapped list.
-// Falls back to the provided mock data when the API returns nothing or errors out,
-// so the carousel never shows an empty section to the user.
+// Custom hook: fetch sản phẩm 1 category, trả về list đã map
+// Nếu API trả rỗng hoặc lỗi thì giữ nguyên fallback (mock data)
+// → carousel không bao giờ bị trống, UI vẫn đẹp dù backend chưa có data
 function useApiProducts({ category, limit = 6, fallback }) {
   const [items, setItems] = useState(fallback)
   useEffect(() => {
@@ -287,27 +287,27 @@ function useApiProducts({ category, limit = 6, fallback }) {
       .then((data) => {
         if (aborted) return
         const list = data.products || []
-        // Only overwrite the fallback when the API actually returned items.
+        // Chỉ thay fallback khi API có data thật
         if (list.length > 0) {
           setItems(list.map((p, i) => mapApiProduct(p, fallback[i % fallback.length].image)))
         }
       })
-      .catch(() => { /* keep fallback on failure */ })
+      .catch(() => { /* lỗi thì giữ fallback */ })
     return () => { aborted = true }
   }, [category, limit])
   return items
 }
 
 function Home() {
-  // Index of the banner image currently shown at the top of the page.
+  // Index banner đang hiển thị trên cùng
   const [bannerIndex, setBannerIndex] = useState(0)
 
-  // Wrap-around navigation: from the last banner, "next" jumps back to the first one (and vice versa).
+  // Modulo để banner cuối → next sẽ quay về banner đầu (và ngược lại)
   const prevBanner = () => setBannerIndex((prev) =>(prev - 1 + bannerImages.length) % bannerImages.length)
   const nextBanner = () => setBannerIndex((prev) => (prev + 1) % bannerImages.length)
 
-  // Each call fires one GET /products request with a different category filter.
-  // The hook returns mock data immediately, then swaps it for real data once the API answers.
+  // Mỗi dòng gọi 1 GET /products với category khác nhau
+  // Hook trả về mock data ngay, đến khi API trả về thì tự thay bằng data thật
   const newItems     = useApiProducts({ limit: 8, fallback: newProducts })
   const desktopItems = useApiProducts({ category: 'desktops', limit: 8, fallback: desktopProducts })
   const laptopItems  = useApiProducts({ category: 'laptops', limit: 8, fallback: laptopProducts })

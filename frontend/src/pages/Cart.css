@@ -333,3 +333,27 @@
     .cart-col-subtotal::before { content: 'Thành tiền: '; font-weight: 600; }
     .cart-col-action { justify-content: flex-end; }
 }
+
+@media (max-width: 480px) {
+    .cart-page { padding: 0 12px; }
+    .cart-header { padding: 24px 0 16px; }
+    .cart-title { font-size: 24px; }
+    .cart-breadcrumb { font-size: 11px; }
+    .cart-thumb { width: 56px; height: 56px; }
+    .cart-product-name { font-size: 14px; }
+    .cart-product-meta { font-size: 11px; }
+    .cart-row { padding: 12px 14px; }
+    .cart-col-price,
+    .cart-col-subtotal { font-size: 14px; }
+    .qty-control button { width: 28px; height: 28px; }
+    .qty-control input { width: 36px; height: 28px; font-size: 13px; }
+    .cart-actions-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .cart-summary { padding: 18px; }
+    .cart-summary-title { font-size: 16px; }
+    .cart-summary-total { font-size: 16px; }
+    .cart-checkout-btn { font-size: 14px; padding: 12px; }
+}

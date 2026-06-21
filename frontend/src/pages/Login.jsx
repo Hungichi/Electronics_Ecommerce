@@ -5,40 +5,33 @@ import { useToast } from "../context/ToastContext";
 import "./Login.css";
 
 const CustomerLogin = () => {
-  // Controlled inputs: their values live in React state.
+  // 2 input controlled — value lưu trong state, mỗi keystroke setState
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  // Inline error text shown right under the form when login fails.
+  // Báo lỗi inline dưới form
   const [error, setError] = useState("");
-  // Disables the submit button + shows "Signing In..." while the request is in flight.
+  // Khóa nút Submit khi đang gọi API
   const [loading, setLoading] = useState(false);
-  // login() comes from AuthContext: it hits the API and stores the user globally.
-  const { login } = useAuth();
-  // toast.success / toast.error trigger the global notification banner.
+  const { login } = useAuth();   // lấy hàm login từ AuthContext
   const toast = useToast();
-  // navigate() lets us redirect without reloading (SPA navigation).
   const navigate = useNavigate();
 
-  // Form submit handler. async so we can await the API call.
   const handleSignIn = async (e) => {
-    // Stop the form from doing a full-page reload on submit.
-    e.preventDefault();
+    e.preventDefault();   // chặn form reload trang
     setError("");
     setLoading(true);
     try {
-      // Calls POST /auth/login through AuthContext -> authApi.login -> request() -> fetch().
+      // login() → AuthContext → authApi.login → fetch POST /auth/login
       const user = await login({ username, password });
-      // Show a green toast as a success confirmation.
       toast.success(`Đăng nhập thành công. Xin chào ${user?.username || ''}!`);
-      // Admins land on the dashboard, regular users go to the homepage.
+      // admin → /admin, user thường → /
       navigate(user?.admin ? "/admin" : "/");
     } catch (err) {
-      // Backend returned a non-2xx response -> show both inline error and a red toast.
+      // Backend trả lỗi (sai password, sai user) → hiện cả inline + toast đỏ
       const msg = err.message || "Đăng nhập thất bại";
       setError(msg);
       toast.error(msg);
     } finally {
-      // Always re-enable the button, whether the request succeeded or failed.
       setLoading(false);
     }
   };

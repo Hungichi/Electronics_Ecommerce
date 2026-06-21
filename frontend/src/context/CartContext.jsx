@@ -5,17 +5,17 @@ import { useAuth } from './AuthContext'
 const CartContext = createContext(null)
 
 export function CartProvider({ children }) {
-  // The cart object returned by the backend (or null when the user isn't logged in).
+  // Cart object backend trả về (null khi chưa login)
   const [cart, setCart] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const { user } = useAuth()
   const userId = user?._id
 
-  // Whenever the logged-in user changes (login/logout), reload the cart from the server.
+  // Mỗi khi user đổi (login/logout) thì fetch lại cart
   useEffect(() => {
     if (!userId) {
-      setCart(null)
+      setCart(null)   // logout → xóa cart khỏi state
       return
     }
     let aborted = false
@@ -27,9 +27,7 @@ export function CartProvider({ children }) {
     return () => { aborted = true }
   }, [userId])
 
-  // ── Mutations ────────────────────────────────────────
-  // Each helper requires a logged-in user (we silently skip if not).
-
+  // Thêm sản phẩm — nếu đã có thì backend tự +qty
   const addToCart = useCallback(async (productId, quantity = 1) => {
     if (!userId) throw new Error('Bạn cần đăng nhập để thêm vào giỏ hàng')
     const data = await cartApi.addItem(userId, productId, quantity)
@@ -37,6 +35,7 @@ export function CartProvider({ children }) {
     return data
   }, [userId])
 
+  // Đổi số lượng — qty <= 0 thì backend tự xóa item
   const updateQuantity = useCallback(async (productId, quantity) => {
     if (!userId) return
     const data = await cartApi.updateItem(userId, productId, quantity)
@@ -57,14 +56,14 @@ export function CartProvider({ children }) {
     setCart((c) => (c ? { ...c, items: [] } : c))
   }, [userId])
 
-  // ── Derived values ───────────────────────────────────
-  // Total number of physical items in the cart (sum of quantities).
+  // Tổng số lượng — để hiện badge trên navbar
+  // useMemo: chỉ tính lại khi cart đổi, tránh tính mỗi lần render
   const totalItems = useMemo(
     () => (cart?.items || []).reduce((sum, it) => sum + (it.quantity || 0), 0),
     [cart]
   )
 
-  // Subtotal of all items priced in USD.
+  // Tổng tiền = sum(giá × số lượng)
   const subtotal = useMemo(
     () => (cart?.items || []).reduce(
       (sum, it) => sum + (it.product_id?.price || 0) * (it.quantity || 0),

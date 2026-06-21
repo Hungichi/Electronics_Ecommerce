@@ -1,22 +1,21 @@
 import { createContext, useCallback, useContext, useState } from 'react'
 import './Toast.css'
 
-// Shared context that exposes the toast API (success / error / info) globally.
 const ToastContext = createContext(null)
 
-// Module-level counter that gives each toast a unique id (so React can key them).
+// Biến ngoài component để mỗi toast có 1 id riêng (React cần key duy nhất)
 let idCounter = 0
 
 export function ToastProvider({ children }) {
-  // List of currently visible toasts. Each item: { id, message, type }
+  // Danh sách toast đang hiển thị
   const [toasts, setToasts] = useState([])
 
-  // Removes a toast by id (called by auto-dismiss timer or the close button).
+  // Xóa 1 toast khỏi list (gọi khi timeout xong hoặc user bấm x)
   const removeToast = useCallback((id) => {
     setToasts((list) => list.filter((t) => t.id !== id))
   }, [])
 
-  // Creates a new toast and schedules auto-removal after `duration` ms (0 = stay forever).
+  // Tạo toast mới, tự đóng sau `duration` ms (0 = không tự đóng)
   const showToast = useCallback((message, type = 'success', duration = 3000) => {
     const id = ++idCounter
     setToasts((list) => [...list, { id, message, type }])
@@ -26,7 +25,7 @@ export function ToastProvider({ children }) {
     return id
   }, [removeToast])
 
-  // Shortcut helpers so callers can do toast.success('...') instead of showToast('...', 'success').
+  // Shortcut cho 3 loại toast hay dùng
   const success = useCallback((msg, d) => showToast(msg, 'success', d), [showToast])
   const error   = useCallback((msg, d) => showToast(msg, 'error', d),   [showToast])
   const info    = useCallback((msg, d) => showToast(msg, 'info', d),    [showToast])
@@ -34,16 +33,16 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={{ showToast, success, error, info, removeToast }}>
       {children}
-      {/* The fixed-position container that paints toasts on top of every page. */}
+      {/* Container fixed top-right, hiển thị chồng các toast */}
       <div className="toast-container">
         {toasts.map((t) => (
-          // Clicking anywhere on the toast also dismisses it.
+          // Click vào toast cũng đóng được
           <div key={t.id} className={`toast toast-${t.type}`} onClick={() => removeToast(t.id)}>
             <span className="toast-icon">
               {t.type === 'success' ? '✓' : t.type === 'error' ? '✕' : 'i'}
             </span>
             <span className="toast-message">{t.message}</span>
-            {/* stopPropagation prevents the toast's onClick from firing twice. */}
+            {/* stopPropagation: ngăn click x lan ra div cha (đỡ gọi removeToast 2 lần) */}
             <button className="toast-close" onClick={(e) => { e.stopPropagation(); removeToast(t.id) }}>×</button>
           </div>
         ))}
@@ -52,7 +51,6 @@ export function ToastProvider({ children }) {
   )
 }
 
-// Hook used by pages to fire toasts: const toast = useToast(); toast.success('...').
 export function useToast() {
   const ctx = useContext(ToastContext)
   if (!ctx) throw new Error('useToast must be used inside ToastProvider')

@@ -273,4 +273,29 @@
     .admin-page { padding: 16px; }
     .admin-form-row { flex-direction: column; }
     .admin-card { padding: 16px; }
+    .admin-header h1 { font-size: 22px; }
+    .admin-card-title { font-size: 16px; margin-bottom: 16px; }
+    .admin-form-actions { flex-direction: column; }
+    .admin-btn-primary,
+    .admin-btn-secondary { width: 100%; }
+    .admin-table thead th { font-size: 12px; padding: 10px 8px; }
+    .admin-table tbody td { padding: 10px 8px; font-size: 13px; }
+    .admin-thumb { width: 40px; height: 40px; }
+    .admin-cell-name { max-width: 140px; }
+    .admin-actions { flex-direction: column; gap: 6px; }
+    .admin-btn-edit,
+    .admin-btn-delete { padding: 5px 10px; font-size: 11px; }
+}
+
+@media (max-width: 480px) {
+    .admin-page { padding: 12px; }
+    .admin-header h1 { font-size: 20px; }
+    .admin-card { padding: 14px; border-radius: 10px; }
+    .admin-form-group input,
+    .admin-form-group textarea { font-size: 13px; padding: 8px 10px; }
+    .admin-checkbox-row {
+        flex-direction: column !important;
+        gap: 12px !important;
+        align-items: flex-start;
+    }
 }

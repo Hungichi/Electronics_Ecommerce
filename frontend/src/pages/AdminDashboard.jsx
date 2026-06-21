@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import { productApi, adminProductApi } from '../services/api'
 import './AdminDashboard.css'
 
-// Shape used when the form is empty (creating a new product).
-// Strings are used for numeric fields because <input> values are always strings;
-// we convert them with Number(...) right before sending to the API.
+// Giá trị mặc định khi form trống (lúc đang tạo mới)
+// Dùng string cho price/stock vì <input> luôn trả về string,
+// sẽ Number() trước khi gửi cho backend
 const EMPTY_FORM = {
   name: '',
   price: '',
@@ -12,26 +12,24 @@ const EMPTY_FORM = {
   category: '',
   brand: '',
   stock: '',
-  images: '',         // textarea: one image URL per line
+  images: '',         // textarea: mỗi URL 1 dòng
   isFeatured: false,
   isActive: true,
 }
 
 function AdminDashboard() {
-  // Product list shown in the table.
+  // Danh sách sản phẩm hiển thị trong bảng
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  // Form state, shared between "create" and "edit" mode.
+  // State của form — dùng chung cho cả thêm mới lẫn sửa
   const [form, setForm] = useState(EMPTY_FORM)
-  // null = creating new; a product id = editing that product.
+  // null = đang thêm mới, có id = đang sửa sản phẩm đó
   const [editingId, setEditingId] = useState(null)
   const [submitting, setSubmitting] = useState(false)
-  // Inline success/error banner shown above the submit button.
   const [message, setMessage] = useState('')
 
-  // Pulls every product from the backend so the table can render them.
-  // Called on mount and after every mutation (create / update / delete / toggle).
+  // Lấy hết sản phẩm để render bảng (gọi khi mount + sau mỗi action)
   const loadProducts = async () => {
     setLoading(true)
     setError('')
@@ -45,18 +43,18 @@ function AdminDashboard() {
     }
   }
 
-  // Empty dependency array means: only fire once, when the component mounts.
+  // Mảng dep rỗng [] → chỉ chạy 1 lần khi mount
   useEffect(() => { loadProducts() }, [])
 
-  // One change handler for every form input.
-  // Reads the `name` attribute of the input and updates the corresponding key in `form`.
-  // Special-cases checkboxes so we store the `checked` boolean instead of the value string.
+  // 1 handler dùng chung cho mọi input — đọc attribute name của input
+  // rồi update đúng key tương ứng trong state form
+  // Checkbox xử lý riêng: lấy checked thay vì value
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
     setForm((f) => ({ ...f, [name]: type === 'checkbox' ? checked : value }))
   }
 
-  // Switches the form into "edit" mode by loading the row's data into the form.
+  // Click "Sửa" → load data sản phẩm vào form
   const startEdit = (p) => {
     setEditingId(p._id)
     setForm({
@@ -66,32 +64,32 @@ function AdminDashboard() {
       category: p.category || '',
       brand: p.brand || '',
       stock: p.stock ?? '',
-      // Convert the images array back into newline-separated text for the textarea.
+      // Mảng URL → text textarea (mỗi URL 1 dòng)
       images: (p.images || []).join('\n'),
       isFeatured: !!p.isFeatured,
       isActive: p.isActive !== false,
     })
     setMessage('')
-    // UX nicety: scroll the form into view so the admin doesn't have to scroll up manually.
+    // Cuộn lên đầu trang để admin không phải tự kéo lên form
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  // Resets the form back to its empty default and exits "edit" mode.
+  // Reset form về trạng thái thêm mới
   const cancelEdit = () => {
     setEditingId(null)
     setForm(EMPTY_FORM)
     setMessage('')
   }
 
-  // Submit handler. Decides whether to POST (create) or PUT (update) based on `editingId`.
+  // Submit: editingId có giá trị → PUT (sửa), không có → POST (thêm mới)
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitting(true)
     setMessage('')
     try {
-      // Build the payload the backend expects:
-      //  - convert numeric fields from string to number
-      //  - convert the images textarea (one URL per line) into a real array
+      // Chuẩn bị payload gửi cho backend:
+      //  - Convert số (Number) vì input trả về string
+      //  - Tách textarea images theo \n thành mảng URL
       const payload = {
         ...form,
         price: Number(form.price) || 0,
@@ -99,15 +97,13 @@ function AdminDashboard() {
         images: form.images.split('\n').map((s) => s.trim()).filter(Boolean),
       }
       if (editingId) {
-        // PUT /admin/products/:id
         await adminProductApi.update(editingId, payload)
         setMessage('Cập nhật sản phẩm thành công.')
       } else {
-        // POST /admin/products
         await adminProductApi.create(payload)
         setMessage('Thêm sản phẩm thành công.')
       }
-      // Clear the form and refresh the table so the new/updated row shows up.
+      // Reset form + reload bảng để hiện sản phẩm vừa thêm/sửa
       cancelEdit()
       await loadProducts()
     } catch (err) {
@@ -117,7 +113,7 @@ function AdminDashboard() {
     }
   }
 
-  // Confirm dialog -> DELETE /admin/products/:id -> reload list.
+  // Hiện dialog xác nhận trước khi xóa
   const handleDelete = async (p) => {
     if (!confirm(`Xóa sản phẩm "${p.name}"?`)) return
     try {
@@ -128,7 +124,7 @@ function AdminDashboard() {
     }
   }
 
-  // PATCH endpoint: backend flips the boolean for us, then we re-fetch to update the table.
+  // PATCH → backend tự lật boolean → reload để cập nhật UI
   const handleToggleFeatured = async (p) => {
     try {
       await adminProductApi.toggleFeatured(p._id)

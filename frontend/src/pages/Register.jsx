@@ -5,30 +5,29 @@ import { useToast } from "../context/ToastContext";
 import "./Register.css";
 
 const Register = () => {
-  // Controlled inputs for every form field.
+  // Các input controlled
   const [username, setUsername]         = useState("");
   const [email, setEmail]               = useState("");
   const [password, setPassword]         = useState("");
   const [confirmPassword, setConfirm]   = useState("");
-  // Per-field error messages produced by client-side validate().
+  // Lỗi từng field do validate phía client
   const [errors, setErrors]             = useState({});
-  // Toggles between "password" and "text" input types so the user can peek at their password.
+  // Bật/tắt hiện mật khẩu (đổi type input)
   const [showPw, setShowPw]             = useState(false);
   const [showCf, setShowCf]             = useState(false);
-  // Error coming back from the server (e.g. "username already exists").
+  // Lỗi trả về từ server (vd username đã tồn tại)
   const [submitError, setSubmitError]   = useState("");
   const [loading, setLoading]           = useState(false);
   const { register } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
 
-  /* ── Client-side validation ── */
-  // Runs before we even hit the API to give instant feedback.
+  // Validate phía client trước khi gọi API → báo lỗi tức thì, đỡ tốn request
   const validate = () => {
     const e = {};
     if (username.trim().length < 3)
       e.username = "Tên tài khoản phải có ít nhất 3 ký tự.";
-    // Simple email regex: anything @ anything . anything (no spaces).
+    // Regex email cơ bản: có @ và có dấu chấm
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       e.email = "Vui lòng nhập địa chỉ e-mail hợp lệ.";
     if (password.length < 6)
@@ -38,24 +37,21 @@ const Register = () => {
     return e;
   };
 
-  /* ── Submit handler ── */
   const handleRegister = async (e) => {
     e.preventDefault();
     setSubmitError("");
-    // Run validation; if any error exists, stop here and let the UI show them.
+    // Có lỗi validate → dừng ngay, không gọi API
     const errs = validate();
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
     setLoading(true);
     try {
-      // Calls POST /auth/register; AuthContext auto-logs the new user in.
+      // register() trong AuthContext sẽ tự setUser luôn → đăng ký xong là login luôn
       const user = await register({ username, email, password });
       toast.success(`Tạo tài khoản thành công. Chào mừng ${user?.username || ''}!`);
-      // After signing up, send the user to the homepage as a logged-in customer.
       navigate("/");
     } catch (err) {
-      // Backend rejected the request (duplicate username, server error, ...).
       const msg = err.message || "Đăng ký thất bại";
       setSubmitError(msg);
       toast.error(msg);

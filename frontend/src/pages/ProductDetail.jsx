@@ -72,31 +72,31 @@ const BENEFITS = [
 // ============================================================
 export default function ProductDetails() {
 
-  // Active tab: "details" | "about" | "specs"
+  // Tab đang active: "details" | "about" | "specs"
   const [activeTab, setActiveTab] = useState("details");
-  // Index of the image currently shown in the carousel.
+  // Index ảnh đang hiển thị trong carousel
   const [activeImage, setActiveImage] = useState(0);
-  // Quantity selector value; clamped to 1+.
+  // Số lượng muốn mua (luôn >= 1)
   const [quantity, setQuantity] = useState(1);
-  // Accordion open/close state for the "More Information" panel.
+  // Đóng/mở accordion "More Information"
   const [moreInfoOpen, setMoreInfoOpen] = useState(false);
 
-  // Read the ":id" segment from the URL (e.g. /products/abc123 -> id = "abc123").
+  // Lấy :id từ URL — vd /products/abc123 → id = "abc123"
   const { id } = useParams();
-  // Product data once the API responds; null while loading.
+  // Data sản phẩm sau khi API trả về, null khi đang load
   const [product, setProduct] = useState(null);
   const [loadError, setLoadError] = useState("");
-  // Cart + auth + toast helpers for the Add to Cart button.
+  // Cần auth + cart + toast cho nút "Add to Cart"
   const { user } = useAuth();
   const { addToCart } = useCart();
   const toast = useToast();
   const navigate = useNavigate();
   const [adding, setAdding] = useState(false);
 
-  // Re-fetch whenever the URL id changes.
+  // Fetch lại mỗi khi đổi id (vd click sang sản phẩm khác)
   useEffect(() => {
     if (!id) return;
-    // Abort flag: ignore the response if a newer fetch already started.
+    // Chống race: nếu user click nhanh, bỏ qua response cũ
     let aborted = false;
     productApi.getById(id)
       .then((data) => { if (!aborted) setProduct(data); })
@@ -111,9 +111,10 @@ export default function ProductDetails() {
     setQuantity((prev) => Math.max(1, prev + delta));
   };
 
-  // Add the current product to the user's cart via the backend.
+  // Thêm sản phẩm vào giỏ — gọi addToCart() của CartContext → backend
   const handleAddToCart = async () => {
     if (!user) {
+      // Chưa đăng nhập → đẩy về /login
       toast.info("Vui lòng đăng nhập để thêm vào giỏ hàng");
       navigate("/login");
       return;

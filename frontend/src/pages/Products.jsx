@@ -3,8 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { productApi } from '../services/api'
 import './Products.css'
 
-// Dropdown options. The value is "<field>:<order>" so we can split() it later
-// and send it to the backend as `sortBy` + `order`.
+// Mỗi option có dạng "field:order" — split bằng dấu : để gửi cho backend
 const SORT_OPTIONS = [
   { value: 'createdAt:desc', label: 'Newest' },
   { value: 'price:asc',      label: 'Price: Low to High' },
@@ -15,15 +14,15 @@ const SORT_OPTIONS = [
 ]
 
 function Products() {
-  // useSearchParams gives us the URL query string as a manageable object.
-  // store filter state in the URL so it survives reloads and can be shared.
+  // useSearchParams: đọc/ghi query string của URL
+  // → lưu filter vào URL nên reload trang vẫn giữ, share link vẫn ra đúng kết quả
   const [searchParams, setSearchParams] = useSearchParams()
   const [products, setProducts] = useState([])
   const [pagination, setPagination] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  // Read each filter from the URL (with sensible defaults).
+  // Đọc filter từ URL (default nếu chưa có)
   const category = searchParams.get('category') || ''
   const search   = searchParams.get('search')   || ''
   const minPrice = searchParams.get('minPrice') || ''
@@ -32,22 +31,21 @@ function Products() {
   const page     = parseInt(searchParams.get('page') || '1', 10)
   const limit    = parseInt(searchParams.get('limit') || '12', 10)
 
-  // Local copies of the input fields. We don't push them to the URL on every keystroke;
-  // we only commit them when the user submits the filter form.
+  // State riêng cho ô input — không push lên URL mỗi keystroke
+  // mà chỉ commit khi user bấm "Apply"
   const [searchInput, setSearchInput] = useState(search)
   const [minInput, setMinInput] = useState(minPrice)
   const [maxInput, setMaxInput] = useState(maxPrice)
 
-  // Re-fetch the product list whenever any filter (in the URL) changes.
+  // Filter trong URL đổi → fetch lại danh sách
   useEffect(() => {
-    // `aborted` is the classic "abort the previous request" trick.
-    // If the user changes filters quickly, an older response could overwrite the newer one.
-    // We flip this flag in the cleanup function so stale responses are ignored.
+    // aborted: chống race condition — nếu user bấm filter liên tục,
+    // response cũ về sau có thể đè lên kết quả mới → bỏ qua nếu aborted = true
     let aborted = false
     setLoading(true)
     setError('')
 
-    // Split "price:asc" -> { sortBy: 'price', order: 'asc' } for the backend.
+    // "price:asc" → sortBy='price', order='asc'
     const [sortBy, order] = sort.split(':')
     const params = { page, limit, sortBy, order }
     if (category) params.category = category
@@ -55,7 +53,7 @@ function Products() {
     if (minPrice) params.minPrice = minPrice
     if (maxPrice) params.maxPrice = maxPrice
 
-    // GET /products?... -> { pagination, products }
+    // GET /products?... → { pagination, products }
     productApi.list(params)
       .then((data) => {
         if (aborted) return
@@ -68,30 +66,30 @@ function Products() {
       })
       .finally(() => !aborted && setLoading(false))
 
-    // Cleanup runs before the next effect or when the component unmounts.
+    // Cleanup chạy trước lần effect tiếp theo hoặc khi unmount
     return () => { aborted = true }
   }, [category, search, minPrice, maxPrice, sort, page, limit])
 
-  // Helper to mutate the URL query string.
-  // Passing { page: undefined } would delete `page`; numbers and strings are set as-is.
+  // Đổi query trên URL — truyền { page: undefined } sẽ xóa param page
   const updateParams = (changes) => {
     const next = new URLSearchParams(searchParams)
     Object.entries(changes).forEach(([k, v]) => {
       if (v === '' || v === null || v === undefined) next.delete(k)
       else next.set(k, v)
     })
-    // Reset to page 1 whenever any non-page filter changes (page 5 may not exist anymore).
+    // Đổi filter khác (không phải page) thì reset về page 1
+    // → tránh case đang ở page 5 mà filter mới chỉ có 2 trang
     if (!('page' in changes)) next.set('page', '1')
     setSearchParams(next)
   }
 
-  // "Apply" button on the sidebar -> commit local inputs into the URL.
+  // Bấm "Apply" → commit input local lên URL
   const handleSearchSubmit = (e) => {
     e.preventDefault()
     updateParams({ search: searchInput, minPrice: minInput, maxPrice: maxInput })
   }
 
-  // "Clear" button -> wipe all filters by replacing the URL with an empty query.
+  // Xóa hết filter
   const clearFilters = () => {
     setSearchInput('')
     setMinInput('')
@@ -99,7 +97,7 @@ function Products() {
     setSearchParams({})
   }
 
-  // Pretty label for the breadcrumb (capitalize the category slug).
+  // "laptops" → "Laptops" cho breadcrumb
   const categoryLabel = category ? category.charAt(0).toUpperCase() + category.slice(1) : 'All Products'
 
   return (

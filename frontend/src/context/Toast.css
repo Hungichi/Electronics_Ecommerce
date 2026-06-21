@@ -1,3 +1,4 @@
+/* Container fixed góc trên phải — luôn nổi trên cùng */
 .toast-container {
     position: fixed;
     top: 100px;
@@ -6,6 +7,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    /* none ở container để click xuyên qua khi không có toast nào */
     pointer-events: none;
 }
 
@@ -24,8 +26,10 @@
     font-weight: 500;
     color: #111;
     cursor: pointer;
+    /* auto trên từng toast để click vào dismiss được */
     pointer-events: auto;
     border-left: 4px solid #888;
+    /* Animation chạy 1 lần khi toast mới mount */
     animation: toast-slide-in 0.3s ease;
 }
 
@@ -92,6 +96,7 @@
     color: #111;
 }
 
+/* Hiệu ứng trượt từ phải vào kèm fade in */
 @keyframes toast-slide-in {
     from {
         opacity: 0;

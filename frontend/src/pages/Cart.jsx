@@ -6,16 +6,16 @@ import { FaTrashAlt } from 'react-icons/fa'
 import './Cart.css'
 
 function Cart() {
-  // user comes from AuthContext; if null, we show a "please log in" state.
+  // user lấy từ AuthContext — null thì hiện màn hình yêu cầu đăng nhập
   const { user } = useAuth()
-  // Everything cart-related (items, totals, mutations) comes from CartContext.
+  // Mọi thứ về cart (items, total, action) lấy từ CartContext
   const { items, subtotal, totalItems, loading, error, updateQuantity, removeItem, clearCart } = useCart()
   const toast = useToast()
   const navigate = useNavigate()
 
-  // Quantity +/- buttons: call backend through the context helper.
+  // Bấm nút +/- → gọi API update quantity qua context
   const handleQuantityChange = async (productId, delta, current) => {
-    const next = Math.max(1, current + delta)
+    const next = Math.max(1, current + delta)   // không cho xuống dưới 1
     if (next === current) return
     try {
       await updateQuantity(productId, next)
@@ -24,7 +24,7 @@ function Cart() {
     }
   }
 
-  // Manual input box: lets the user type a quantity directly.
+  // User gõ trực tiếp số lượng vào ô input
   const handleQuantityInput = async (productId, value) => {
     const qty = parseInt(value, 10)
     if (!qty || qty < 1) return

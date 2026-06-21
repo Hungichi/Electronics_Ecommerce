@@ -259,20 +259,64 @@
     }
 }
 
+@media (max-width: 768px) {
+    .banner-text {
+        width: 90%;
+        max-width: 90%;
+        margin-left: 5%;
+        font-size: 16px;
+        padding: 12px;
+    }
+
+    .banner-overlay h2 {
+        font-size: 26px;
+    }
+
+    .banner-overlay p {
+        font-size: 14px;
+    }
+
+    .section-header h2 {
+        font-size: 20px;
+    }
+
+    .see-all-link {
+        font-size: 12px;
+    }
+}
+
 @media (max-width: 480px) {
     .banner-section {
         height: 240px;
     }
 
-    .banner-overlay h1 {
+    .banner-text {
+        width: 100%;
+        margin-left: 0;
+        font-size: 14px;
+    }
+
+    .banner-overlay h2 {
         font-size: 22px;
+        margin-top: 8%;
     }
 
     .banner-overlay p {
         font-size: 13px;
     }
 
+    .banner-btn {
+        padding: 0.5rem 1rem;
+        font-size: 14px;
+    }
+
     .product-section {
         padding: 24px 12px 40px;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
     }
 }

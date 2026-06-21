@@ -1,32 +1,41 @@
-// Base URL of the Express backend. Change this to your deployed URL in production.
+// URL gốc của backend (port 8000)
 const API_URL = 'http://localhost:8000'
 
-// Generic HTTP helper used by every API function below.
-// - Adds the JSON content-type header automatically
-// - Serializes the body with JSON.stringify
-// - Parses the response back into a JS object
-// - Throws an Error with the server message when the response is not OK (status >= 400)
+// Đọc token đã lưu trong localStorage để đính kèm vào mọi request
+function getStoredToken() {
+  try {
+    const raw = localStorage.getItem('auth.user')
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    return parsed?.token || null
+  } catch {
+    return null
+  }
+}
+
+// Hàm gọi API dùng chung — bọc lại fetch cho gọn
 async function request(path, { method = 'GET', body, headers = {} } = {}) {
+  const token = getStoredToken()
   const opts = {
     method,
     headers: {
       'Content-Type': 'application/json',
+      // Có token thì kèm "Authorization: Bearer ..." để backend biết user là ai
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
   }
-  // Only attach a body when one is provided (GET/DELETE usually don't send a body).
+  // Có body thì stringify rồi đính vào (POST/PUT/PATCH)
   if (body !== undefined) opts.body = JSON.stringify(body)
 
-  // Fire the actual HTTP request using the browser's built-in fetch API.
   const res = await fetch(`${API_URL}${path}`, opts)
 
-  // Read the raw text first so we can still recover when the body is empty
-  // or not valid JSON (e.g. plain text error messages from Express).
+  // Đọc text trước, sau đó parse JSON — phòng khi body rỗng hoặc không phải JSON
   const text = await res.text()
   let data
   try { data = text ? JSON.parse(text) : null } catch { data = text }
 
-  // fetch() does NOT throw on HTTP errors, so we have to check `res.ok` manually.
+  // fetch không tự throw khi status >= 400, phải tự check
   if (!res.ok) {
     const message = typeof data === 'string' ? data : (data?.message || `Request failed (${res.status})`)
     const error = new Error(message)
@@ -37,26 +46,36 @@ async function request(path, { method = 'GET', body, headers = {} } = {}) {
   return data
 }
 
-// ── Auth endpoints ───────────────────────────────────────
-// Wrap each backend route in a tiny function so the rest of the app
-// never has to know the URL or HTTP method directly.
+// ── Auth ─────────────────────────────────────────────────
 export const authApi = {
-  // POST /auth/register -> creates a new user and returns the user object
+  // POST /auth/register — tạo user mới, trả về user + token
   register: ({ username, email, password }) =>
     request('/auth/register', { method: 'POST', body: { username, email, password } }),
 
-  // POST /auth/login -> validates credentials and returns the user object (with `admin` flag)
+  // POST /auth/login — kiểm tra mật khẩu, trả về user + token
   login: ({ username, password }) =>
     request('/auth/login', { method: 'POST', body: { username, password } }),
 }
 
-// ── Public product endpoints (no auth required) ──────────
+// ── User profile (cần JWT) ───────────────────────────────
+export const userApi = {
+  // Lấy hồ sơ user đang đăng nhập
+  getMe: () => request('/users/me'),
+
+  // Cập nhật email/phone/avatar/addresses
+  updateMe: (payload) => request('/users/me', { method: 'PUT', body: payload }),
+
+  // Đổi mật khẩu (cần nhập mật khẩu cũ để xác thực)
+  changePassword: (currentPassword, newPassword) =>
+    request('/users/me/password', { method: 'PUT', body: { currentPassword, newPassword } }),
+}
+
+// ── Sản phẩm public ──────────────────────────────────────
 export const productApi = {
-  // GET /products?page=...&category=...&sortBy=...&order=...
-  // Builds a query string from the params object and calls the listing endpoint.
+  // Lấy danh sách sản phẩm — params có thể có category, sort, page, ...
   list: (params = {}) => {
     const qs = new URLSearchParams()
-    // Skip empty/null/undefined values so the URL stays clean.
+    // Bỏ qua các giá trị rỗng để URL không có ?category=&search=
     Object.entries(params).forEach(([k, v]) => {
       if (v !== undefined && v !== null && v !== '') qs.append(k, v)
     })
@@ -64,48 +83,29 @@ export const productApi = {
     return request(`/products${query ? `?${query}` : ''}`)
   },
 
-  // GET /products/:id -> returns a single product
+  // Lấy chi tiết 1 sản phẩm theo id
   getById: (id) => request(`/products/${id}`),
 }
 
-// ── Cart endpoints (scoped per user) ─────────────────────
-// Every endpoint takes the user's _id as the first path segment.
+// ── Giỏ hàng (mỗi user 1 cart riêng) ─────────────────────
 export const cartApi = {
-  // GET /cart/:userId -> returns the cart with populated product details
   get: (userId) => request(`/cart/${userId}`),
-
-  // POST /cart/:userId/items -> adds a product (or increments quantity if it's already there)
   addItem: (userId, product_id, quantity = 1) =>
     request(`/cart/${userId}/items`, { method: 'POST', body: { product_id, quantity } }),
-
-  // PUT /cart/:userId/items/:productId -> sets the quantity of an item
   updateItem: (userId, productId, quantity) =>
     request(`/cart/${userId}/items/${productId}`, { method: 'PUT', body: { quantity } }),
-
-  // DELETE /cart/:userId/items/:productId -> removes one item
   removeItem: (userId, productId) =>
     request(`/cart/${userId}/items/${productId}`, { method: 'DELETE' }),
-
-  // DELETE /cart/:userId -> empties the cart
   clear: (userId) => request(`/cart/${userId}`, { method: 'DELETE' }),
 }
 
-// ── Admin product endpoints (CRUD + toggles) ─────────────
-// Used by the AdminDashboard page only.
+// ── Admin: CRUD sản phẩm ─────────────────────────────────
 export const adminProductApi = {
-  // POST /admin/products -> create a new product from the form payload
   create: (product) => request('/admin/products', { method: 'POST', body: product }),
-
-  // PUT /admin/products/:id -> replace the product with the new payload
   update: (id, product) => request(`/admin/products/${id}`, { method: 'PUT', body: product }),
-
-  // DELETE /admin/products/:id -> remove the product
   remove: (id) => request(`/admin/products/${id}`, { method: 'DELETE' }),
-
-  // PATCH /admin/products/:id/toggle-featured -> flips the isFeatured boolean
+  // PATCH chỉ đổi 1 field — lật giá trị featured/active
   toggleFeatured: (id) => request(`/admin/products/${id}/toggle-featured`, { method: 'PATCH' }),
-
-  // PATCH /admin/products/:id/toggle-active -> flips the isActive boolean
   toggleActive: (id) => request(`/admin/products/${id}/toggle-active`, { method: 'PATCH' }),
 }
 

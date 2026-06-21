@@ -9,6 +9,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import AdminDashboard from './pages/AdminDashboard'
 import AboutUs from './pages/AboutUs'
+import Profile from './pages/Profile'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/about" element={<AboutUs />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
       <Footer />
     </>

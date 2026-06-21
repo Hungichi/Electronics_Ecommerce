@@ -1,16 +1,14 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { authApi } from '../services/api'
 
-// React Context object that will carry the auth state down the tree.
-// Any component inside <AuthProvider> can read it via useAuth().
+// Context để chia sẻ state user cho toàn bộ app
 export const AuthContext = createContext(null)
 
-// Key used in localStorage so the login survives a page refresh.
 const STORAGE_KEY = 'auth.user'
 
 export function AuthProvider({ children }) {
-  // Lazy initializer: this function only runs ONCE on first mount.
-  // It restores the user object from localStorage so refreshing the page keeps the session.
+  // Lazy init: chỉ chạy 1 lần khi mount, đọc user cũ từ localStorage
+  // → reload trang vẫn còn đăng nhập
   const [user, setUser] = useState(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
@@ -20,39 +18,42 @@ export function AuthProvider({ children }) {
     }
   })
 
-  // Keep localStorage in sync with state whenever the user changes (login/logout).
+  // Mỗi khi user đổi (login/logout) thì đồng bộ vào localStorage
   useEffect(() => {
     if (user) localStorage.setItem(STORAGE_KEY, JSON.stringify(user))
     else localStorage.removeItem(STORAGE_KEY)
   }, [user])
 
-  // Calls the backend login endpoint and stores the returned user in context.
+  // Gọi API login, lưu user trả về vào state
   const login = async ({ username, password }) => {
     const data = await authApi.login({ username, password })
     setUser(data)
     return data
   }
 
-  // Calls the backend register endpoint and auto-logs the new user in.
+  // Gọi API register, tự đăng nhập luôn
   const register = async ({ username, email, password }) => {
     const data = await authApi.register({ username, email, password })
     setUser(data)
     return data
   }
 
-  // Clears the user; useEffect above will wipe localStorage as well.
+  // Đăng xuất → set null → useEffect ở trên sẽ xóa localStorage
   const logout = () => setUser(null)
 
-  // Provide the auth state + helpers + a derived isAdmin flag to every child.
+  // Merge thông tin mới (vd sau khi sửa profile) vào user, giữ nguyên token
+  const updateUser = (patch) => {
+    setUser((prev) => (prev ? { ...prev, ...patch } : prev))
+  }
+
   return (
-    <AuthContext.Provider value={{ user, setUser, login, register, logout, isAdmin: !!user?.admin }}>
+    <AuthContext.Provider value={{ user, setUser, login, register, logout, updateUser, isAdmin: !!user?.admin }}>
       {children}
     </AuthContext.Provider>
   )
 }
 
-// Convenience hook so components can do: const { user, login } = useAuth().
-// Throws if used outside the provider to catch wiring mistakes early.
+// Hook tiện dùng — gọi const { user, login } = useAuth() ở component bất kỳ
 export function useAuth() {
   const ctx = useContext(AuthContext)
   if (!ctx) throw new Error('useAuth must be used inside AuthProvider')

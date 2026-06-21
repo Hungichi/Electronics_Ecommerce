@@ -130,3 +130,47 @@
   width: 28px;
   fill: white;
 }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .breadcrumb { padding: 10px 24px; }
+  .page-title { padding: 20px 24px 16px; font-size: 22px; }
+  .cards-row {
+    flex-direction: column;
+    gap: 20px;
+    padding: 0 24px 32px;
+  }
+  .card { padding: 22px 22px 28px; }
+  .features-strip {
+    padding: 32px 24px;
+    flex-wrap: wrap;
+    gap: 28px;
+  }
+  .feature-item { flex: 1 1 calc(50% - 14px); }
+}
+
+@media (max-width: 520px) {
+  .breadcrumb { padding: 10px 16px; font-size: 12px; }
+  .page-title { padding: 16px 16px 12px; font-size: 20px; }
+  .cards-row { padding: 0 16px 24px; }
+  .card { padding: 18px 18px 24px; }
+  .card-title { font-size: 16px; }
+  .card-subtitle { font-size: 13px; margin-bottom: 16px; }
+  .signin-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .btn-primary,
+  .btn-outline-primary {
+    width: 100%;
+    text-align: center;
+  }
+  .features-strip {
+    padding: 28px 16px;
+    flex-direction: column;
+    gap: 22px;
+  }
+  .feature-item { flex: 1 1 100%; }
+  .feature-icon-wrap { width: 56px; height: 56px; }
+}
