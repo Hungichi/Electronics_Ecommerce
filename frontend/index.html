@@ -7,6 +7,17 @@
     <title>Electronics Shop</title>
   </head>
   <body>
+    <script>
+      // Bắt URL gốc do 404.html lưu rồi push lại vào History API
+      // để React Router hiểu được route ban đầu user gõ
+      (function () {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Electronics Shop</title>
+    <script>
+      // GitHub Pages khi vào URL không khớp file nào sẽ trả về 404.html.
+      // Script này lưu URL gốc vào sessionStorage rồi redirect về index.html,
+      // index.html sẽ đọc lại và push vào React Router.
+      sessionStorage.redirect = location.href;
+    </script>
+    <meta http-equiv="refresh" content="0;URL='/BTL-JS/'" />
+  </head>
+  <body></body>
+</html>

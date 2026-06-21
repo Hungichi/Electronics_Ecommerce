@@ -1,5 +1,7 @@
-// URL gốc của backend (port 8000)
-const API_URL = 'http://localhost:8000'
+// URL gốc của backend
+// - Khi chạy local: dùng http://localhost:8000
+// - Khi build production: đặt biến VITE_API_URL khi build (vd: trên Vercel/Render)
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 // Đọc token đã lưu trong localStorage để đính kèm vào mọi request
 function getStoredToken() {
