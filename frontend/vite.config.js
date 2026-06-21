@@ -6,6 +6,6 @@ import react from '@vitejs/plugin-react'
 // → ĐỔI 'BTL-JS' thành tên repo GitHub của bạn.
 // Khi chạy `npm run dev` ở local, base này không ảnh hưởng.
 export default defineConfig({
-  base: '/BTL-JS/',
+  base: '/Electronics_Ecommerce/',
   plugins: [react()],
 })
